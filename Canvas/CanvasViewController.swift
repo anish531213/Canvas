@@ -48,16 +48,15 @@ class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
             UIView.animate(withDuration:0.4, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 1, options:[] ,
                            animations: { () -> Void in
                 let velocity = sender.velocity(in: self.view)
-                if velocity.y < 0 {
-                    self.trayView.center = self.trayUp
+                if velocity.y < 0 {   
                     let image = UIImage(named: "down_arrow")
                     self.downArrow.image = image
+                    self.trayView.center = self.trayUp
  
                 } else {
-
-                    self.trayView.center = self.trayDown
                     let image = UIImage(cgImage: (self.downArrow.image?.cgImage)!, scale: 1.0, orientation: UIImageOrientation.downMirrored)
                     self.downArrow.image = image
+                    self.trayView.center = self.trayDown
                 }
             }, completion: nil)
             
