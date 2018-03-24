@@ -11,6 +11,7 @@ import UIKit
 class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
 
     @IBOutlet weak var trayView: UIView!
+    @IBOutlet weak var downArrow: UIImageView!
     
     var newlyCreatedFace: UIImageView!
     var newlyCreatedFaceOriginalCenter: CGPoint!
@@ -49,8 +50,14 @@ class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
                 let velocity = sender.velocity(in: self.view)
                 if velocity.y < 0 {
                     self.trayView.center = self.trayUp
+                    let image = UIImage(named: "down_arrow")
+                    self.downArrow.image = image
+ 
                 } else {
+
                     self.trayView.center = self.trayDown
+                    let image = UIImage(cgImage: (self.downArrow.image?.cgImage)!, scale: 1.0, orientation: UIImageOrientation.downMirrored)
+                    self.downArrow.image = image
                 }
             }, completion: nil)
             
@@ -70,10 +77,16 @@ class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
             
             let panGesture = UIPanGestureRecognizer(target: self, action: #selector(didPanNewFace(sender:)))
             newlyCreatedFace.addGestureRecognizer(panGesture)
+            panGesture.delegate = self
             
-            let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(didPinchFace(sender:)))
+            let doubletap = UITapGestureRecognizer(target: self, action: #selector(didDoubleTap(sender:)))
+            doubletap.numberOfTapsRequired = 2
+            
+            newlyCreatedFace.addGestureRecognizer(doubletap)
+            
+            let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(didPinch(sender:)))
             newlyCreatedFace.addGestureRecognizer(pinchGesture)
-            pinchGesture.delegate = self
+            
             
             UIView.animate(withDuration: 0.05, animations: {
                 self.newlyCreatedFace.transform = self.newlyCreatedFace.transform.scaledBy(x: 2, y: 2)
@@ -84,18 +97,25 @@ class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
             newlyCreatedFace.center = CGPoint(x: newlyCreatedFaceOriginalCenter.x + translation.x, y: newlyCreatedFaceOriginalCenter.y + translation.y)
         }
         else if sender.state == .ended {
+            if (newlyCreatedFace.center.y > 450) {
+                newlyCreatedFace.removeFromSuperview()
+            }
             UIView.animate(withDuration: 0.05, animations: {
                 self.newlyCreatedFace.transform = self.newlyCreatedFace.transform.scaledBy(x: 0.5, y: 0.5)
             })
         }
     }
     
-    @objc func didPinchFace(sender: UIPinchGestureRecognizer) {
-        print("pinched")
+    @objc func didPinch(sender: UIPinchGestureRecognizer) {
         let scale = sender.scale
         let imageView = sender.view as! UIImageView
         imageView.transform = CGAffineTransform(scaleX: scale, y: scale)
         sender.scale = 1
+    }
+    
+    @objc func didDoubleTap(sender: UITapGestureRecognizer) {
+        let imgView = sender.view as! UIImageView
+        imgView.removeFromSuperview()
     }
     
     @objc func didPanNewFace(sender: UIPanGestureRecognizer) {
@@ -112,6 +132,9 @@ class CanvasViewController: UIViewController, UIGestureRecognizerDelegate {
         } else if sender.state == .changed {
             newlyCreatedFace.center = CGPoint(x: newlyCreatedFaceOriginalCenter.x + translation.x, y: newlyCreatedFaceOriginalCenter.y + translation.y)
         } else if sender.state == .ended {
+            if (newlyCreatedFace.center.y > 450) {
+                newlyCreatedFace.removeFromSuperview()
+            }
             UIView.animate(withDuration: 0.05, animations: {
                 self.newlyCreatedFace.transform = self.newlyCreatedFace.transform.scaledBy(x: 0.5, y: 0.5)
             })
